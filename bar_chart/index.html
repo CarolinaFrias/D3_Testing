@@ -2,17 +2,19 @@
 <meta charset="utf-8">
 <style>
 
-.chart div {
+.chart .bar {
   font: 10px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 3px;
-  margin: 1px;
-  color: white;
+  fill: steelblue;
+}
+
+.chart .country {
+  fill: white;
 }
 
 </style>
-<div class="chart"></div>
+<svg class="chart" width="450px" height="120px">
+  <image href="assets/olympics.png" height="40px" width="90px" x="350px" y="60px"/>
+</svg>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
 <script>
 
@@ -26,13 +28,28 @@ var data = d3.csv("olimpics.csv", function(d) {
     .domain([0, d3.max(medals,function(m){return m.total})])
     .range([0, 420]);
 
-    d3.select(".chart")
-    .selectAll("div")
+    var bar = d3.select(".chart")
+    .selectAll(".bar")
         .data(medals)
-    .enter().append("div")
-        .style("width", function(d) { return x(d.total) + "px"; })
-        .text(function(d) { return d.id; });
+    .enter().append("g")
+      .attr("class", "bar")
+      .attr("transform", function(d) { return "translate(" + 0 + "," + d.y + ")"; });
 
+      bar.append("rect")
+        .attr("width", function(d) { return x(d.total) + "px"; })
+        .attr("height","12px");
+
+      bar.append("text")
+        .text(function(d) { return d.id; })
+        .attr("x", function(d){return x(d.total)- (d.id.length * 8) +"px"})
+        .attr("y", "10px")
+        .attr("class","country");
+
+      bar.append("text")
+        .text(function(d) {return d.total;})
+        .attr("x", function(d) {return x(d.total) + 5 + "px"})
+        .attr("y", "10px")
+      
 });
 
 </script>
