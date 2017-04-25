@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<head>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.8.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <style>
+        .ca, .us {fill: #DF4949;}
+
+        .uc, .br, .mx {fill: #E27A3F;}
+
+        .other {fill: #45B29D;}     
+
+    </style>
+</head>
+<body>
+    <div id="chart"></div>
+        <script>
+            var data = {"countries_msg_vol": { "CA": 170, "US": 393, "CU": 9, "BR": 89, "MX": 192, "Other": 254 }};
+
+            var channel = 'rts-xNjiKP4Bg4jgElhhn9v9';
+
+            var pubnub = new PubNub({
+                        publishKey : 'pub-c-10d85f00-5f0c-493b-8b05-ccd3e5454770',
+                        subscribeKey : 'sub-c-98ff5c04-29e0-11e7-aca9-02ee2ddab7fe'
+            });
+
+            function processData(data) {
+                var obj = data.countries_msg_vol;
+
+                var newDataSet = [];
+
+                for(var prop in obj) {
+                    newDataSet.push({name: prop, className: prop.toLowerCase(), size: obj[prop]});
+                }
+                return {children: newDataSet};
+            }
+            
+            function drawBubbles(message) {
+                var message = bubble.nodes(processData(data))
+                            .filter(function(d) { return !d.children; });
+            }
+            
+            pubnub.subscribe({
+                    channel: channel,
+                    callback: drawBubbles()
+            });
+
+            var diameter = 600;
+
+            var svg = d3.select('#chart').append('svg')
+                    .attr('width', diameter)
+                    .attr('height', diameter);
+
+            var bubble = d3.layout.pack()
+                        .size([diameter, diameter])
+                        .padding(3)
+                        .value(function(d) {return d.size;}); 
+            
+
+            // function processData(data) {
+            //     var obj = data.countries_msg_vol;
+
+            //     var newDataSet = [];
+
+            //     for(var prop in obj) {
+            //         newDataSet.push({name: prop, className: prop.toLowerCase(), size: obj[prop]});
+            //     }
+            //     return {children: newDataSet};
+            // }
+
+            var nodes = bubble.nodes(processData(data))
+                            .filter(function(d) { return !d.children; });
+
+            var vis = svg.selectAll('circle')
+                    .data(nodes, function(d) { return d.name; });
+            
+            vis.enter().append('circle')
+            .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+            .attr('r', function(d) { return d.r; })
+            .attr('class', function(d) { return d.className; });
+
+            var vis = svg.selectAll('circle')
+                    .data(nodes, function(d) { return d.name; });
+            
+            var duration = 200;
+            
+            var delay = 0;
+
+            vis.transition()
+                .duration(duration)
+                .delay(function(d, i) {delay = i * 7; return delay;}) 
+                .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+                .attr('r', function(d) { return d.r; })
+	
+            vis.enter().append('circle')
+                .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+                .attr('r', function(d) { return d.r; })
+                .attr('class', function(d) { return d.className; })
+                .style('opacity', 0) 
+                .transition()
+                .duration(duration * 1.2)
+                    .style('opacity', 1);
+
+            vis.exit()
+                .transition()
+                .duration(duration + delay)
+                .style('opacity', 0)
+                .remove();
+            
+        </script>
+</body>
