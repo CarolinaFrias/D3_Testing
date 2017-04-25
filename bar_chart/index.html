@@ -18,7 +18,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
 <script>
 
-var data = d3.csv("olimpics.csv", function(d) {
+var data = d3.csv("https://raw.githubusercontent.com/CarolinaFrias/D3_Testing/master/bar_chart/olimpics.csv", function(d) {
   d.total = +d.total;
   if (d.total) return d;
 }, function(error, medals) {
